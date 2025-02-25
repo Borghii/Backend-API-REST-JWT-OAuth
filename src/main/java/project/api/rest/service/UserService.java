@@ -1,8 +1,21 @@
 package project.api.rest.service;
 
 
-import org.springframework.web.bind.annotation.RestController;
+import project.api.rest.entity.User;
 
-@RestController()
-public class UserService {
+import java.util.List;
+import java.util.Optional;
+
+public interface UserService {
+
+    List<User> findAllUsers();
+
+    Optional<User> findById(int id);
+
+    User createUser(User user);
+
+    User updateUser(User user);
+
+    void deleteUser(int id);
 }
+
