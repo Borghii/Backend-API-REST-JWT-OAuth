@@ -27,11 +27,11 @@ public class User {
     private String email;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false, insertable = false)
     private Instant createdAt;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updated_at")
+    @Column(name = "updated_at" , insertable = false)
     private Instant updatedAt;
 
 }
