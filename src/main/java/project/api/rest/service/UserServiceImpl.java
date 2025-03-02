@@ -2,9 +2,12 @@ package project.api.rest.service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import project.api.rest.dto.UserDTO;
 import project.api.rest.entity.User;
 import project.api.rest.repository.UserRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,31 +27,47 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findById(int id) {
-        return Optional.ofNullable(userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " no encontrado")));
-
+    public User findById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found"));
     }
+
 
     @Override
     public User createUser(User user) {
 
-        if (user.getId() != null && userRepository.existsById(user.getId())) {
-            throw new IllegalArgumentException("User with ID  " + user.getId() + " already exists");
+        if (userExist(user)) {
+            throw new IllegalArgumentException("User with email  " + user.getEmail() + " already exists");
         }
 
         return userRepository.save(user);
+    }
+
+    private boolean userExist(User user){
+        return userRepository.existsByEmail(user.getEmail());
     }
 
     @Override
-    public User updateUser(User user) {
+    public User updateUser(int id, User user) {
 
-        if (user.getId() == null || !userRepository.existsById(user.getId())) {
-            throw new EntityNotFoundException("Unable to update, user not found with ID: " + user.getId());
+
+        User currentUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
+
+        if (!currentUser.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
-        return userRepository.save(user);
+        currentUser.setName(user.getName());
+        currentUser.setSurname(user.getSurname());
+        currentUser.setEmail(user.getEmail());
+
+
+        return userRepository.save(currentUser);
     }
+
+
+
 
     @Override
     public void deleteUser(int id) {
