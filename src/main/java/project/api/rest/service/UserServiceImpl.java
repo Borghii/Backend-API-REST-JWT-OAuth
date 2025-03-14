@@ -1,5 +1,6 @@
 package project.api.rest.service;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.api.rest.dto.UserDTO;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(int id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
     }
 
 
@@ -37,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public User createUser(User user) {
 
         if (userExist(user)) {
-            throw new IllegalArgumentException("User with email  " + user.getEmail() + " already exists");
+            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
         return userRepository.save(user);
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int id) {
 
         if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User with ID " + id + " not found");
+            throw new EntityNotFoundException("User with id: " + id + " not found");
         }
 
         userRepository.deleteById(id);
