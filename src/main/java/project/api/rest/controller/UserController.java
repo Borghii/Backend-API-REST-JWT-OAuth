@@ -54,7 +54,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable int id){
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id){
         return new ResponseEntity<>(userMapper.toDTO(userService.findById(id)), HttpStatus.OK);
     }
 
@@ -76,7 +76,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable int id){
+    public ResponseEntity<String> deleteUserById(@PathVariable Integer id){
         userService.deleteUser(id);
         return new ResponseEntity<>("User with id : "+ id+" deleted successfully", HttpStatus.OK);
     }
@@ -89,7 +89,7 @@ public class UserController {
     })
     @PutMapping("/{userId}")
     public ResponseEntity<UserDTO> updateUserById(
-            @PathVariable int userId,
+            @PathVariable Integer userId,
             @Valid @RequestBody UserDTO userDTO) {
 
         UserDTO updatedUserDTO = userMapper.toDTO(userService.updateUser(userId,userMapper.toEntity(userDTO)));

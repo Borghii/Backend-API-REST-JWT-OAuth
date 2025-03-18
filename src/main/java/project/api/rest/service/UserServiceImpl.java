@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(int id) {
+    public User findById(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
     }
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(int id, User user) {
+    public User updateUser(Integer id, User user) {
 
 
         User currentUser = userRepository.findById(id)
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void deleteUser(int id) {
+    public void deleteUser(Integer id) {
 
         if (!userRepository.existsById(id)) {
             throw new EntityNotFoundException("User with id: " + id + " not found");

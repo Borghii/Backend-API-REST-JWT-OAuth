@@ -172,6 +172,31 @@ class UserControllerIntTest {
 
         }
 
+        @Test
+        void shouldThrowMethodArgumentNotValidException() throws Exception{
+
+            //GIVEN
+            UserDTO userDTO1 = UserDTO.builder()
+                    .name("qwerewrweqrrerqwereqwrewreqwrqewrerqewrewqrerqwerqwereqreqrewrrqe")
+                    .surname(null)
+                    .email("test")
+                    .build();
+
+            //WHEN - THEN
+            mockMvc.perform(post(ENDPOINT_USERS)
+                    .contentType(APPLICATION_JSON)
+                    .content(new ObjectMapper().writeValueAsString(userDTO1)))
+                    .andExpect(status().is4xxClientError())
+                    .andExpect(jsonPath("$.details.email").value("Email isn't valid"))
+                    .andExpect(jsonPath("$.details.name").value("Name cannot exceed 50 characters"))
+                    .andExpect(jsonPath("$.details.surname").value("must not be blank"))
+                    .andExpect(jsonPath("$.message").value("One or more fields are invalid."))
+                    .andDo(print());
+
+        }
+
+
+
 
     }
 
