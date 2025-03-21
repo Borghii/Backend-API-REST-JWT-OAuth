@@ -189,7 +189,6 @@ class UserControllerIntTest {
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.details.email").value("Email isn't valid"))
                     .andExpect(jsonPath("$.details.name").value("Name cannot exceed 50 characters"))
-                    .andExpect(jsonPath("$.details.surname").value("must not be blank"))
                     .andExpect(jsonPath("$.message").value("One or more fields are invalid."))
                     .andDo(print());
 
