@@ -2,25 +2,37 @@ package project.api.rest.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import project.api.rest.dto.UserDTO;
+import project.api.rest.entity.Role;
 import project.api.rest.entity.User;
+import project.api.rest.repository.RoleRepository;
 import project.api.rest.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -42,6 +54,16 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
+        Set<Role> roles = getRoles(user);
+
+        if (roles.isEmpty()) {
+            throw new IllegalArgumentException("The roles specified does not exist.");
+        }
+
+        user.setRoles(roles);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
@@ -60,12 +82,21 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
+        Set<Role> roles = getRoles(user);
+
         currentUser.setName(user.getName());
         currentUser.setSurname(user.getSurname());
         currentUser.setEmail(user.getEmail());
+        currentUser.setRoles(roles);
 
 
         return userRepository.save(currentUser);
+    }
+
+    private HashSet<Role> getRoles(User user) {
+        return new HashSet<>(roleRepository.findRoleByRoleEnumIn(user.getRoles().stream()
+                .map(role -> role.getRoleEnum().name())
+                .collect(Collectors.toList())));
     }
 
 
@@ -79,5 +110,24 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(()->new EntityNotFoundException("User with email: " + username + " not found"));
+
+        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+
+        //adding roles
+        user.getRoles().forEach(role-> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
+
+        //adding roles' permissions
+        user.getRoles().stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .forEach(permission -> authorityList.add(new SimpleGrantedAuthority(permission.getPermissionName())));
+
+        return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),authorityList);
     }
 }

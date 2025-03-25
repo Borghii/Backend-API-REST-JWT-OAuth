@@ -8,9 +8,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import project.api.rest.entity.Permission;
+import project.api.rest.entity.Role;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -18,10 +21,13 @@ import java.time.Instant;
 @NoArgsConstructor
 public class UserDTO implements Serializable {
 
-    public UserDTO(String name, String surname, String email, Instant createdAt, Instant updatedAt) {
+    public UserDTO(String name, String surname, String password, String email, Set<String> roles, Set<Permission> permissions, Instant createdAt, Instant updatedAt) {
         this.name = name;
         this.surname = surname;
+        this.password = password;
         this.email = email;
+        this.roles = roles;
+        this.permissions = permissions;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -35,9 +41,19 @@ public class UserDTO implements Serializable {
     @NotBlank
     private String surname;
 
+    @NotNull(message="password is required")
+    @NotBlank
+    private String password;
+
     @NotNull(message="email is required")
     @Email(message="Email isn't valid")
     private String email;
+
+    @NotNull(message="role is required")
+    @Size(max = 3)
+    private Set<String> roles;
+
+    private Set<Permission> permissions;
 
     private Instant createdAt;
 
