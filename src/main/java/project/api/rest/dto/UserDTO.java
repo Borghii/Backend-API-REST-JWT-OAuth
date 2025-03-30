@@ -13,6 +13,7 @@ import project.api.rest.entity.Role;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 @Builder
@@ -21,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserDTO implements Serializable {
 
-    public UserDTO(String name, String surname, String password, String email, Set<String> roles, Set<Permission> permissions, Instant createdAt, Instant updatedAt) {
+    public UserDTO(String name, String surname, String password, String email, Set<String> roles, Set<String> permissions, Instant createdAt, Instant updatedAt) {
         this.name = name;
         this.surname = surname;
         this.password = password;
@@ -50,10 +51,11 @@ public class UserDTO implements Serializable {
     private String email;
 
     @NotNull(message="role is required")
+    @NotBlank
     @Size(max = 3)
     private Set<String> roles;
 
-    private Set<Permission> permissions;
+    private Set<String> permissions;
 
     private Instant createdAt;
 

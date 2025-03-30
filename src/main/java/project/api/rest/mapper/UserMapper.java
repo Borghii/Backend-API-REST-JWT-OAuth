@@ -2,12 +2,12 @@ package project.api.rest.mapper;
 
 import org.springframework.stereotype.Component;
 import project.api.rest.dto.UserDTO;
+import project.api.rest.entity.Permission;
 import project.api.rest.entity.Role;
 import project.api.rest.entity.RoleEnum;
 import project.api.rest.entity.User;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,21 +22,24 @@ public class UserMapper {
         user.setSurname(userDTO.getSurname());
         user.setPassword(userDTO.getPassword());
         user.setEmail(userDTO.getEmail());
-
+        user.setPassword("****");
 
         user.setRoles(userDTO.getRoles().stream()
-                .map(roleName -> new Role(RoleEnum.valueOf(roleName)))
+                .map(role -> new Role(RoleEnum.valueOf(role)))
                 .collect(Collectors.toSet()));
 
         return user;
     }
 
+
     public UserDTO toDTO(User user){
         return UserDTO.builder()
                 .name(user.getName())
                 .surname(user.getSurname())
-                .password(user.getPassword())
                 .email(user.getEmail())
+
+                //I don't want to expose roles
+//                .roles(user.getRoles())
 
                 .roles(user.getRoles().stream()
                         .map(role -> role.getRoleEnum().name())
@@ -44,6 +47,7 @@ public class UserMapper {
 
                 .permissions(user.getRoles().stream()
                         .flatMap(role -> role.getPermissions().stream())
+                        .map(Permission::getPermissionName)
                         .collect(Collectors.toSet()))
 
                 .createdAt(user.getCreatedAt().truncatedTo(ChronoUnit.SECONDS))
