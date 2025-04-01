@@ -13,6 +13,8 @@ public interface UserService extends UserDetailsService {
 
     User findById(Integer id);
 
+    User findByEmail(String email);
+
     User createUser(User user);
 
     User updateUser(Integer id, User user);

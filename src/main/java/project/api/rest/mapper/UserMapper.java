@@ -22,7 +22,7 @@ public class UserMapper {
         user.setSurname(userDTO.getSurname());
         user.setPassword(userDTO.getPassword());
         user.setEmail(userDTO.getEmail());
-        user.setPassword("****");
+
 
         user.setRoles(userDTO.getRoles().stream()
                 .map(role -> new Role(RoleEnum.valueOf(role)))
@@ -37,6 +37,8 @@ public class UserMapper {
                 .name(user.getName())
                 .surname(user.getSurname())
                 .email(user.getEmail())
+                .password("****")
+
 
                 //I don't want to expose roles
 //                .roles(user.getRoles())

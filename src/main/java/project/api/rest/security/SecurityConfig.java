@@ -39,7 +39,7 @@ public class SecurityConfig {
 
                     //Public Endpoints
                     auth.requestMatchers(HttpMethod.POST,"/api/v1/auth/sign-up").permitAll();
-                    auth.requestMatchers(HttpMethod.POST,"/api/v1/auth/token").permitAll();
+                    auth.requestMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll();
 
                     //Private Endpoints
                     auth.requestMatchers(HttpMethod.POST,"/api/v1/users").hasAuthority("CREATE");

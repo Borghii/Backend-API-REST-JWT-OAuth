@@ -1,9 +1,6 @@
 package project.api.rest.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,7 +48,7 @@ public class UserDTO implements Serializable {
     private String email;
 
     @NotNull(message="role is required")
-    @NotBlank
+    @NotEmpty
     @Size(max = 3)
     private Set<String> roles;
 

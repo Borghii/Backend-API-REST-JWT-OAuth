@@ -4,15 +4,20 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import project.api.rest.dto.AuthResponse;
 import project.api.rest.dto.UserDTO;
 import project.api.rest.mapper.UserMapper;
 import project.api.rest.service.TokenService;
 import project.api.rest.service.UserService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,15 +35,37 @@ public class AuthController {
         this.userMapper = userMapper;
     }
 
+//    @PostMapping("/sign-up")
+//    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+//        UserDTO createdUserDTO = userMapper.toDTO(userService.createUser(userMapper.toEntity(userDTO)));
+//        return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
+//    }
+
+//    @PostMapping("/token")
+//    public String token(Authentication authentication) {
+//        return tokenService.generateToken(authentication);
+//    }
+
     @PostMapping("/sign-up")
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<AuthResponse> createUser(@Valid @RequestBody UserDTO userDTO) {
+
         UserDTO createdUserDTO = userMapper.toDTO(userService.createUser(userMapper.toEntity(userDTO)));
-        return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDTO.getEmail(), userDTO.getPassword());
+
+        String token = tokenService.generateToken(authentication);
+
+        return new ResponseEntity<>(new AuthResponse(createdUserDTO,token), HttpStatus.CREATED);
     }
 
-    @PostMapping("/token")
-    public String token(Authentication authentication) {
-        return tokenService.generateToken(authentication);
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(Authentication authentication) {
+        String token = tokenService.generateToken(authentication);
+
+        UserDTO authUserDTO = userMapper.toDTO(userService.findByEmail(authentication.getName()));
+
+        return new ResponseEntity<>(new AuthResponse(authUserDTO,token),HttpStatus.OK);
     }
 
 }
