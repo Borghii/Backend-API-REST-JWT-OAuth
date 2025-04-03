@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +17,8 @@ import project.api.rest.mapper.UserMapper;
 import project.api.rest.service.TokenService;
 import project.api.rest.service.UserService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -52,7 +53,9 @@ public class AuthController {
         UserDTO createdUserDTO = userMapper.toDTO(userService.createUser(userMapper.toEntity(userDTO)));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                userDTO.getEmail(), userDTO.getPassword());
+                userDTO.getEmail(),
+                userDTO.getPassword(),
+                userService.loadUserByUsername(createdUserDTO.getEmail()).getAuthorities());
 
         String token = tokenService.generateToken(authentication);
 

@@ -1,36 +1,32 @@
 package project.api.rest.integration;
 
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.github.dockerjava.core.MediaType;
-import org.testcontainers.utility.MountableFile;
-import project.api.rest.constants.TestConstants;
 import project.api.rest.dto.UserDTO;
 import project.api.rest.entity.User;
 import project.api.rest.mapper.UserMapper;
 import project.api.rest.repository.UserRepository;
+import project.api.rest.service.TokenService;
 import project.api.rest.service.UserService;
 
-import static org.antlr.v4.runtime.misc.MurmurHash.update;
+import java.util.Set;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -41,18 +37,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static project.api.rest.constants.TestConstants.*;
 
 
+//@Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
-class UserControllerIntTest {
-
-    @Autowired
-    private UserRepository userRepository;
+class UserControllerIntTest extends MySQLContainerBaseTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TokenService tokenService;
 
     @Autowired
     private UserMapper userMapper;
@@ -63,35 +58,53 @@ class UserControllerIntTest {
     @Autowired
     private JdbcTemplate jdbcTemplate; // Para reiniciar el contador de IDs
 
-    @Container
-    @ServiceConnection
-    private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.4.2")
-            .withDatabaseName("testdb")
-            .withUsername("root")
-            .withPassword("password")
-            .withInitScript("schema.sql");
+    private String authToken;
+
+//    @Container
+//    @ServiceConnection
+//    private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.4.2")
+//            .withDatabaseName("testdb")
+//            .withUsername("root")
+//            .withPassword("password")
+//            .withInitScript("schema.sql");
+
+    @BeforeEach
+    void setUp() {
+        //jdbcTemplate.execute("ALTER TABLE users AUTO_INCREMENT = 1"); // Reinicia el contador de IDs
+
+
+        User user = userService.createUser(userMapper.toEntity(userDTO));
+
+        authToken = tokenService.generateToken(new UsernamePasswordAuthenticationToken(
+                user.getEmail(),
+                "password",
+                Set.of(new SimpleGrantedAuthority("READ"),
+                        new SimpleGrantedAuthority("CREATE"),
+                        new SimpleGrantedAuthority("UPDATE"),
+                        new SimpleGrantedAuthority("DELETE"))
+        ));
+    }
+
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.execute("DELETE FROM users");
+        jdbcTemplate.execute("ALTER TABLE users AUTO_INCREMENT = 1");
+    }
 
     @Test
     void connectionEstablished() {
         assertThat(mysqlContainer.isRunning()).isTrue();
     }
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll(); // Elimina los datos
-        jdbcTemplate.execute("ALTER TABLE users AUTO_INCREMENT = 1"); // Reinicia el contador de IDs
-    }
-
     @Nested
     class GetUserTests {
         @Test
         void testGetAllUsers() throws Exception {
-            //given
-            userService.createUser(userMapper.toEntity(userDTO));
 
             //when/then
             mockMvc.perform(get(ENDPOINT_USERS)
-                            .contentType(APPLICATION_JSON))
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)))
                     .andExpect(jsonPath("$[0].name").value("Test"))
@@ -102,21 +115,25 @@ class UserControllerIntTest {
 
         @Test
         void shouldReturnUserById() throws Exception {
-            //given
-            userService.createUser(userMapper.toEntity(userDTO2));
+//            //given
+//            userService.createUser(userMapper.toEntity(userDTO2));
 
             // when/then
-            mockMvc.perform(get(ENDPOINT_USERS + "/" + 1).contentType(APPLICATION_JSON))
+            mockMvc.perform(get(ENDPOINT_USERS + "/" + 1)
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("test2@gmail.com"))
+                    .andExpect(jsonPath("$.email").value("test@gmail.com"))
                     .andDo(print());
         }
 
         @Test
-        void shouldThrow404UserNotFound() throws Exception{
+        void shouldThrow404UserNotFound() throws Exception {
 
             // when/then
-            mockMvc.perform(get(ENDPOINT_USERS + "/" + 999).contentType(APPLICATION_JSON))
+            mockMvc.perform(get(ENDPOINT_USERS + "/" + 999)
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with id: " + 999 + " not found"))
                     .andDo(print());
@@ -126,54 +143,49 @@ class UserControllerIntTest {
     }
 
     @Nested
-    class CreateUserTests{
+    class CreateUserTests {
         @Test
         void shouldCreateUser() throws Exception {
             // given/when
             mockMvc.perform(post(ENDPOINT_USERS)
                             .contentType(APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(userDTO)))
+                            .header("Authorization", "Bearer " + authToken)
+                            .content(new ObjectMapper().writeValueAsString(userDTO2)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name").value("Test"))
                     .andExpect(jsonPath("$.surname").value("Test"))
-                    .andExpect(jsonPath("$.email").value("test@gmail.com"))
+                    .andExpect(jsonPath("$.email").value("test2@gmail.com"))
                     .andDo(print());
 
             // then
 
             mockMvc.perform(get(ENDPOINT_USERS)
-                            .contentType(APPLICATION_JSON))
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
+
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].name").value("Test"))
-                    .andExpect(jsonPath("$[0].surname").value("Test"))
-                    .andExpect(jsonPath("$[0].email").value("test@gmail.com"))
+                    .andExpect(jsonPath("$[1].name").value("Test"))
+                    .andExpect(jsonPath("$[1].surname").value("Test"))
+                    .andExpect(jsonPath("$[1].email").value("test2@gmail.com"))
                     .andDo(print());
 
 
         }
 
         @Test
-        void shouldThrow400UserAlreadyExist() throws Exception{
-
-            //given
-            userService.createUser(userMapper.toEntity(userDTO));
-
-
-
+        void shouldThrow400UserAlreadyExist() throws Exception {
             // when/then
             mockMvc.perform(post(ENDPOINT_USERS)
                             .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken)
                             .content(new ObjectMapper().writeValueAsString(userDTO)))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with email " + userDTO.getEmail() + " already exists"))
                     .andDo(print());
-
-
-
         }
 
         @Test
-        void shouldThrowMethodArgumentNotValidException() throws Exception{
+        void shouldThrowMethodArgumentNotValidException() throws Exception {
 
             //GIVEN
             UserDTO userDTO1 = UserDTO.builder()
@@ -184,8 +196,9 @@ class UserControllerIntTest {
 
             //WHEN - THEN
             mockMvc.perform(post(ENDPOINT_USERS)
-                    .contentType(APPLICATION_JSON)
-                    .content(new ObjectMapper().writeValueAsString(userDTO1)))
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken)
+                            .content(new ObjectMapper().writeValueAsString(userDTO1)))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.details.email").value("Email isn't valid"))
                     .andExpect(jsonPath("$.details.name").value("Name cannot exceed 50 characters"))
@@ -195,46 +208,45 @@ class UserControllerIntTest {
         }
 
 
-
-
     }
 
     @Nested
     class DeleteUserTests {
         @Test
         void shouldDeleteUser() throws Exception {
-            //given
-            userService.createUser(userMapper.toEntity(userDTO));
 
+            //given
             int id = 1;
 
             // when/then
-
-            mockMvc.perform(get(ENDPOINT_USERS+"/" + id)
-                            .contentType(APPLICATION_JSON))
+            mockMvc.perform(get(ENDPOINT_USERS + "/" + id)
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
                     .andDo(print());
 
             mockMvc.perform(delete(ENDPOINT_USERS + "/" + id)
-                            .contentType(APPLICATION_JSON))
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value("User with id : "+ id+" deleted successfully"))
+                    .andExpect(jsonPath("$").value("User with id : " + id + " deleted successfully"))
                     .andDo(print());
 
             // then
-
-            mockMvc.perform(get(ENDPOINT_USERS+"/" + id)
-                            .contentType(APPLICATION_JSON))
+            mockMvc.perform(get(ENDPOINT_USERS + "/" + id)
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().is4xxClientError())
                     .andDo(print());
 
         }
 
         @Test
-        void shouldThrow404UserNotFoundToDelete() throws Exception{
+        void shouldThrow404UserNotFoundToDelete() throws Exception {
 
-            mockMvc.perform(delete(ENDPOINT_USERS+"/999")
-                    .contentType(APPLICATION_JSON))
+            mockMvc.perform(delete(ENDPOINT_USERS + "/999")
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with id: " + 999 + " not found"))
                     .andDo(print());
@@ -248,55 +260,51 @@ class UserControllerIntTest {
         void shouldUpdateUserById() throws Exception {
 
             //given
-            userService.createUser(userMapper.toEntity(userDTO));
             int id = 1;
 
             // when/then
-            mockMvc.perform(put(ENDPOINT_USERS+"/"+id)
+            mockMvc.perform(put(ENDPOINT_USERS + "/" + id)
                             .contentType(APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(userDTO2)))
+                            .content(new ObjectMapper().writeValueAsString(userDTO2))
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value("test2@gmail.com"))
                     .andDo(print());
 
             // then
-
-            mockMvc.perform(get(ENDPOINT_USERS+"/"+id)
-                            .contentType(APPLICATION_JSON))
+            mockMvc.perform(get(ENDPOINT_USERS + "/" + id)
+                            .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value("test2@gmail.com"))
                     .andDo(print());
 
         }
 
-//        @ApiResponse(responseCode = "400", description = "User with email already exist"),
-//        @ApiResponse(responseCode = "404", description = "User not found")
 
         @Test
         void shouldThrow400UserWithEmailAlreadyExistToUpdate() throws Exception {
 
             //given
-            userService.createUser(userMapper.toEntity(userDTO));
-
             userService.createUser(userMapper.toEntity(userDTO2));
             int id = 2;
 
-           UserDTO updateDTO = UserDTO.builder()
-                   .name(userDTO2.getName())
-                   .surname(userDTO2.getSurname())
-                   .email("test@gmail.com")
-                   .build();
-
-
+            UserDTO updateDTO = UserDTO.builder()
+                    .name(userDTO2.getName())
+                    .surname(userDTO2.getSurname())
+                    .email("test@gmail.com")
+                    .password("test")
+                    .roles(Set.of("ADMIN"))
+                    .build();
 
             // when/then
-            mockMvc.perform(put(ENDPOINT_USERS+"/"+id)
+            mockMvc.perform(put(ENDPOINT_USERS + "/" + id)
                             .contentType(APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + authToken)
                             .content(new ObjectMapper().writeValueAsString(updateDTO)))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with email " + userDTO.getEmail() + " already exists"))
                     .andDo(print());
-
 
 
         }
@@ -308,28 +316,18 @@ class UserControllerIntTest {
             int id = 999;
 
             // when/then
-            mockMvc.perform(put(ENDPOINT_USERS+"/"+id)
+            mockMvc.perform(put(ENDPOINT_USERS + "/" + id)
                             .contentType(APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(userDTO2)))
+                            .content(new ObjectMapper().writeValueAsString(userDTO2))
+                            .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with id: " + 999 + " not found"))
                     .andDo(print());
 
 
-
         }
 
 
-
-
     }
-
-
-
-
-
-
-
-
 
 }
