@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     private HashSet<Role> getRoles(User user) {
         return new HashSet<>(roleRepository.findRoleByRoleEnumIn(user.getRoles().stream()
-                .map(role -> role.getRoleEnum().name())
+                .map(Role::getRoleEnum)
                 .collect(Collectors.toList())));
     }
 

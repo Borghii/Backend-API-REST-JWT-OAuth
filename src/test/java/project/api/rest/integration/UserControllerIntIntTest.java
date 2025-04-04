@@ -7,21 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import project.api.rest.ContainerDB.MySQLContainerBaseIntTest;
 import project.api.rest.dto.UserDTO;
 import project.api.rest.entity.User;
 import project.api.rest.mapper.UserMapper;
-import project.api.rest.repository.UserRepository;
 import project.api.rest.service.TokenService;
 import project.api.rest.service.UserService;
 
@@ -41,7 +36,7 @@ import static project.api.rest.constants.TestConstants.*;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class UserControllerIntTest extends MySQLContainerBaseTest {
+class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
 
     @Autowired
     private UserService userService;
@@ -73,7 +68,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
         //jdbcTemplate.execute("ALTER TABLE users AUTO_INCREMENT = 1"); // Reinicia el contador de IDs
 
 
-        User user = userService.createUser(userMapper.toEntity(userDTO));
+        User user = userService.createUser(userMapper.toEntity(USER_DTO));
 
         authToken = tokenService.generateToken(new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
@@ -116,7 +111,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
         @Test
         void shouldReturnUserById() throws Exception {
 //            //given
-//            userService.createUser(userMapper.toEntity(userDTO2));
+//            userService.createUser(userMapper.toEntity(USER_DTO_2));
 
             // when/then
             mockMvc.perform(get(ENDPOINT_USERS + "/" + 1)
@@ -150,7 +145,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
             mockMvc.perform(post(ENDPOINT_USERS)
                             .contentType(APPLICATION_JSON)
                             .header("Authorization", "Bearer " + authToken)
-                            .content(new ObjectMapper().writeValueAsString(userDTO2)))
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO_2)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name").value("Test"))
                     .andExpect(jsonPath("$.surname").value("Test"))
@@ -178,9 +173,9 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
             mockMvc.perform(post(ENDPOINT_USERS)
                             .contentType(APPLICATION_JSON)
                             .header("Authorization", "Bearer " + authToken)
-                            .content(new ObjectMapper().writeValueAsString(userDTO)))
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO)))
                     .andExpect(status().is4xxClientError())
-                    .andExpect(jsonPath("$.message").value("User with email " + userDTO.getEmail() + " already exists"))
+                    .andExpect(jsonPath("$.message").value("User with email " + USER_DTO.getEmail() + " already exists"))
                     .andDo(print());
         }
 
@@ -265,7 +260,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
             // when/then
             mockMvc.perform(put(ENDPOINT_USERS + "/" + id)
                             .contentType(APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(userDTO2))
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO_2))
                             .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value("test2@gmail.com"))
@@ -286,12 +281,12 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
         void shouldThrow400UserWithEmailAlreadyExistToUpdate() throws Exception {
 
             //given
-            userService.createUser(userMapper.toEntity(userDTO2));
+            userService.createUser(userMapper.toEntity(USER_DTO_2));
             int id = 2;
 
             UserDTO updateDTO = UserDTO.builder()
-                    .name(userDTO2.getName())
-                    .surname(userDTO2.getSurname())
+                    .name(USER_DTO_2.getName())
+                    .surname(USER_DTO_2.getSurname())
                     .email("test@gmail.com")
                     .password("test")
                     .roles(Set.of("ADMIN"))
@@ -303,7 +298,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
                             .header("Authorization", "Bearer " + authToken)
                             .content(new ObjectMapper().writeValueAsString(updateDTO)))
                     .andExpect(status().is4xxClientError())
-                    .andExpect(jsonPath("$.message").value("User with email " + userDTO.getEmail() + " already exists"))
+                    .andExpect(jsonPath("$.message").value("User with email " + USER_DTO.getEmail() + " already exists"))
                     .andDo(print());
 
 
@@ -318,7 +313,7 @@ class UserControllerIntTest extends MySQLContainerBaseTest {
             // when/then
             mockMvc.perform(put(ENDPOINT_USERS + "/" + id)
                             .contentType(APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(userDTO2))
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO_2))
                             .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().is4xxClientError())
                     .andExpect(jsonPath("$.message").value("User with id: " + 999 + " not found"))

@@ -2,17 +2,17 @@ package project.api.rest.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Builder
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "roles")
 public class Role {

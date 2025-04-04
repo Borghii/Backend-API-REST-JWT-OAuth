@@ -1,13 +1,10 @@
-package project.api.rest.integration;
+package project.api.rest.ContainerDB;
 
-import jakarta.activation.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 
-@SpringBootTest
-public class MySQLContainerBaseTest {
+public class MySQLContainerBaseIntTest {
 
 //    Si comparas esta clase con MySQLContainerTest, verás que las anotaciones
 //    @Testcontainers y @Container han desaparecido. Si las dejamos, Testcontainers

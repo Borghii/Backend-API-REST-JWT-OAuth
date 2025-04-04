@@ -1,10 +1,7 @@
 package project.api.rest.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,11 +12,14 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Builder
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

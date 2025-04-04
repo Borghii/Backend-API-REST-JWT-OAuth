@@ -9,5 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
-    List<Role> findRoleByRoleEnumIn(List<String> roleNames);
+
+    //SELECT * FROM role WHERE role_enum IN ('ADMIN', 'USER', 'DEVELOPER');
+    List<Role> findRoleByRoleEnumIn(List<RoleEnum> roleNames);
 }
