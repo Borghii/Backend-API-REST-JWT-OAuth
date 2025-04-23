@@ -50,6 +50,11 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST,"/api/v1/auth/sign-up").permitAll();
                     auth.requestMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll();
 
+                    //SWAGGER ENDPOINT
+                    auth.requestMatchers(HttpMethod.GET, "/swagger-ui-custom.html").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api-docs/**").permitAll();
+
                     //Private Endpoints
                     auth.requestMatchers(HttpMethod.POST,"/api/v1/users").hasAuthority("CREATE");
                     auth.requestMatchers(HttpMethod.GET,"/api/v1/users").hasAuthority("READ");
@@ -57,10 +62,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.PUT,"/api/v1/users/{id}").hasAuthority("UPDATE");
                     auth.requestMatchers(HttpMethod.DELETE,"/api/v1/users/{id}").hasAuthority("DELETE");
 
-                    //SWAGGER ENDPOINT
-                    auth.requestMatchers(HttpMethod.GET, "/swagger-ui-custom.html").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api-docs/**").permitAll();
+
 
                     auth.anyRequest().denyAll();
 

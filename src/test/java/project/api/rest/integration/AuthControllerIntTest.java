@@ -30,7 +30,7 @@ import static project.api.rest.constants.TestConstants.USER_DTO;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(value = "test")
-class AuthControllerIntIntTest extends MySQLContainerBaseIntTest {
+class AuthControllerIntTest extends MySQLContainerBaseIntTest {
 
     @Autowired
     private MockMvc mockMvc;

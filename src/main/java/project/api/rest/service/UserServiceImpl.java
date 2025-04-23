@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    private boolean userExist(User user){
+    boolean userExist(User user){
         return userRepository.existsByEmail(user.getEmail());
     }
 
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(currentUser);
     }
 
-    private HashSet<Role> getRoles(User user) {
+    HashSet<Role> getRoles(User user) {
         return new HashSet<>(roleRepository.findRoleByRoleEnumIn(user.getRoles().stream()
                 .map(Role::getRoleEnum)
                 .collect(Collectors.toList())));

@@ -65,8 +65,6 @@ class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
 
     @BeforeEach
     void setUp() {
-        //jdbcTemplate.execute("ALTER TABLE users AUTO_INCREMENT = 1"); // Reinicia el contador de IDs
-
 
         User user = userService.createUser(userMapper.toEntity(USER_DTO));
 
@@ -237,6 +235,18 @@ class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
         }
 
         @Test
+        void deleteUserTwiceShouldReturn404() throws Exception {
+            int id = 1;
+            mockMvc.perform(delete(ENDPOINT_USERS + "/" + id)
+                            .header("Authorization", "Bearer " + authToken))
+                    .andExpect(status().isOk());
+
+            mockMvc.perform(delete(ENDPOINT_USERS + "/" + id)
+                            .header("Authorization", "Bearer " + authToken))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
         void shouldThrow404UserNotFoundToDelete() throws Exception {
 
             mockMvc.perform(delete(ENDPOINT_USERS + "/999")
@@ -324,5 +334,50 @@ class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
 
 
     }
+
+    @Nested
+    class UnauthorizedAccessTests {
+
+        @Test
+        void getAllUsersWithoutTokenShouldReturnUnauthorized() throws Exception {
+            mockMvc.perform(get(ENDPOINT_USERS)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void getUserByIdWithoutTokenShouldReturnUnauthorized() throws Exception {
+            mockMvc.perform(get(ENDPOINT_USERS + "/1")
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void createUserWithoutTokenShouldReturnUnauthorized() throws Exception {
+
+
+            mockMvc.perform(post(ENDPOINT_USERS)
+                            .contentType(APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void updateUserWithoutTokenShouldReturnUnauthorized() throws Exception {
+
+            mockMvc.perform(put(ENDPOINT_USERS + "/1")
+                            .contentType(APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(USER_DTO)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void deleteUserWithoutTokenShouldReturnUnauthorized() throws Exception {
+            mockMvc.perform(delete(ENDPOINT_USERS + "/1")
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+
 
 }
