@@ -1,6 +1,5 @@
 package project.api.rest.ContainerDB;
 
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 

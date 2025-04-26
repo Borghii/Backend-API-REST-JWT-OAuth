@@ -14,9 +14,7 @@ import java.util.stream.Collectors;
 public class UserMapper {
 
 
-
-
-    public User toEntity(UserDTO userDTO){
+    public User toEntity(UserDTO userDTO) {
         User user = new User();
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
@@ -32,7 +30,7 @@ public class UserMapper {
     }
 
 
-    public UserDTO toDTO(User user){
+    public UserDTO toDTO(User user) {
         return UserDTO.builder()
                 .name(user.getName())
                 .surname(user.getSurname())

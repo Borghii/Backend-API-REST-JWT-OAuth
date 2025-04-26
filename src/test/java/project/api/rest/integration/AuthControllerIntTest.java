@@ -52,11 +52,11 @@ class AuthControllerIntTest extends MySQLContainerBaseIntTest {
 
 
     @Nested
-    class SignUp{
+    class SignUp {
         @Test
         void shouldCreateUser() throws Exception {
 
-            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH+"/sign-up")
+            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH + "/sign-up")
                             .contentType(APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(USER_DTO)))
                     .andExpect(status().isCreated())
@@ -74,7 +74,7 @@ class AuthControllerIntTest extends MySQLContainerBaseIntTest {
                     .surname("Test")
                     .build();
 
-            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH+"/sign-up")
+            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH + "/sign-up")
                             .contentType(APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(userDTO2)))
                     .andExpect(status().is4xxClientError())
@@ -86,14 +86,14 @@ class AuthControllerIntTest extends MySQLContainerBaseIntTest {
     }
 
     @Nested
-    class Login{
+    class Login {
 
         @Test
-        void shouldLoginUser() throws Exception{
+        void shouldLoginUser() throws Exception {
 
             userService.createUser(userMapper.toEntity(USER_DTO));
 
-            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH+"/login")
+            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH + "/login")
                             .contentType(APPLICATION_JSON)
                             .with(httpBasic(USER_DTO.getEmail(), USER_DTO.getPassword())))
                     .andExpect(status().isOk())
@@ -103,8 +103,8 @@ class AuthControllerIntTest extends MySQLContainerBaseIntTest {
         }
 
         @Test
-        void shouldThrow401Unauthorized() throws Exception{
-            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH+"/login")
+        void shouldThrow401Unauthorized() throws Exception {
+            mockMvc.perform(post(TestConstants.ENDPOINT_AUTH + "/login")
                             .contentType(APPLICATION_JSON)
                             .with(httpBasic(USER_DTO.getEmail(), USER_DTO.getPassword())))
                     .andExpect(status().isUnauthorized());

@@ -1,11 +1,9 @@
 package project.api.rest.exceptions;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 

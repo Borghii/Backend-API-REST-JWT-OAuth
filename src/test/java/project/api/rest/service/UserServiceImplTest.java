@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import project.api.rest.constants.TestConstants;
-import project.api.rest.entity.Permission;
 import project.api.rest.entity.Role;
 import project.api.rest.entity.RoleEnum;
 import project.api.rest.entity.User;
@@ -30,13 +29,11 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
 
     @Mock
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Mock
     private UserRepository userRepository;
     @Mock
     private RoleRepository roleRepository;
-
-    @Mock
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
     @Captor
     private ArgumentCaptor<User> userCaptor;
 
@@ -54,6 +51,23 @@ class UserServiceImplTest {
 
     }
 
+    @Test
+    void testGetRoles() {
+        // given
+        User user = TestConstants.USER;
+
+        List<RoleEnum> roleEnums = List.of(RoleEnum.ADMIN);
+
+
+        when(roleRepository.findRoleByRoleEnumIn(roleEnums)).thenReturn(List.of(new Role(RoleEnum.ADMIN)));
+
+        // when
+        HashSet<Role> result = userService.getRoles(user);
+
+        // then
+        assertThat(result.size()).isEqualTo(1);
+        verify(roleRepository).findRoleByRoleEnumIn(anyList());
+    }
 
     @Nested
     class findById {
@@ -87,15 +101,10 @@ class UserServiceImplTest {
         }
 
 
-
-
-
-
-
     }
 
     @Nested
-    class findByEmail{
+    class findByEmail {
         @Test
         void shouldThrowExceptionWhenUserWithEmailNotFound() {
             // given
@@ -110,7 +119,7 @@ class UserServiceImplTest {
     }
 
     @Nested
-    class createUser{
+    class createUser {
         @Test
         void shouldThrowExceptionIfUserExists() {
             // given
@@ -143,7 +152,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void shouldSetUserCorrectly()   throws Exception{
+        void shouldSetUserCorrectly() throws Exception {
             //given
             User user = TestConstants.USER;
 
@@ -164,9 +173,7 @@ class UserServiceImplTest {
         }
 
 
-
     }
-
 
     @Nested
     class updateUser {
@@ -241,24 +248,6 @@ class UserServiceImplTest {
         }
     }
 
-    @Test
-    void testGetRoles() {
-        // given
-        User user = TestConstants.USER;
-
-        List<RoleEnum> roleEnums = List.of(RoleEnum.ADMIN);
-
-
-        when(roleRepository.findRoleByRoleEnumIn(roleEnums)).thenReturn(List.of(new Role(RoleEnum.ADMIN)));
-
-        // when
-        HashSet<Role> result = userService.getRoles(user);
-
-        // then
-        assertThat(result.size()).isEqualTo(1);
-        verify(roleRepository).findRoleByRoleEnumIn(anyList());
-    }
-
     @Nested
     class deleteUser {
         @Test
@@ -319,6 +308,6 @@ class UserServiceImplTest {
 
             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
             assertThat(authorities.size()).isEqualTo(5);
+        }
     }
-}
 }

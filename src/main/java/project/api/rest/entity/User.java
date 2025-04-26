@@ -2,14 +2,12 @@ package project.api.rest.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Builder
@@ -43,7 +41,7 @@ public class User {
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at" , insertable = false)
+    @Column(name = "updated_at", insertable = false)
     private Instant updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})

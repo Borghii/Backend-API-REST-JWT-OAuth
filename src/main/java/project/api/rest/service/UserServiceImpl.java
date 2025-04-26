@@ -1,9 +1,8 @@
 package project.api.rest.service;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,7 +13,10 @@ import project.api.rest.entity.User;
 import project.api.rest.repository.RoleRepository;
 import project.api.rest.repository.UserRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder){
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -71,7 +73,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    boolean userExist(User user){
+    boolean userExist(User user) {
         return userRepository.existsByEmail(user.getEmail());
     }
 
@@ -104,8 +106,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
-
     @Override
     public void deleteUser(Integer id) {
 
@@ -120,18 +120,18 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmail(username)
-                .orElseThrow(()->new EntityNotFoundException("User with email: " + username + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User with email: " + username + " not found"));
 
         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
 
         //adding roles
-        user.getRoles().forEach(role-> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
+        user.getRoles().forEach(role -> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
 
         //adding roles' permissions
         user.getRoles().stream()
                 .flatMap(role -> role.getPermissions().stream())
                 .forEach(permission -> authorityList.add(new SimpleGrantedAuthority(permission.getPermissionName())));
 
-        return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),authorityList);
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorityList);
     }
 }

@@ -2,7 +2,6 @@ package project.api.rest.mapper;
 
 import org.junit.jupiter.api.Test;
 import project.api.rest.dto.UserDTO;
-import project.api.rest.entity.Permission;
 import project.api.rest.entity.User;
 
 import java.time.temporal.ChronoUnit;
@@ -25,8 +24,8 @@ class UserMapperTest {
         assertThat(user.getName()).isEqualTo(USER_DTO.getName());
         assertThat(user.getSurname()).isEqualTo(USER_DTO.getSurname());
         assertThat(user.getEmail()).isEqualTo(USER_DTO.getEmail());
-        assertThat(user.getRoles().stream().map(r ->r.getRoleEnum()
-                .name())
+        assertThat(user.getRoles().stream().map(r -> r.getRoleEnum()
+                        .name())
                 .collect(Collectors.toSet()))
                 .isEqualTo(USER_DTO.getRoles());
 
@@ -44,7 +43,7 @@ class UserMapperTest {
         assertThat(userDTO.getEmail()).isEqualTo(USER.getEmail());
         assertThat(userDTO.getPassword()).isEqualTo("****");
         assertThat(userDTO.getRoles()).isEqualTo(Set.of("ADMIN"));
-        assertThat(userDTO.getPermissions()).isEqualTo(Set.of("READ","CREATE","UPDATE","DELETE"));
+        assertThat(userDTO.getPermissions()).isEqualTo(Set.of("READ", "CREATE", "UPDATE", "DELETE"));
         assertThat(userDTO.getCreatedAt()).isEqualTo(USER.getCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertThat(userDTO.getUpdatedAt()).isEqualTo(USER.getUpdatedAt().truncatedTo(ChronoUnit.SECONDS));
     }
