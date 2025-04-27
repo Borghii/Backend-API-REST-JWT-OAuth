@@ -44,7 +44,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-up").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
-                    //SWAGGER ENDPOINT
+                    //SWAGGER Endpoint
                     auth.requestMatchers(HttpMethod.GET, "/swagger-ui-custom.html").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api-docs/**").permitAll();
@@ -55,6 +55,9 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").hasAuthority("READ");
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").hasAuthority("UPDATE");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/v1/users/{id}").hasAuthority("DELETE");
+
+                    //Gemini AI Endpoint
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/gemini/nickname/{name}").authenticated();
 
 
                     auth.anyRequest().denyAll();
