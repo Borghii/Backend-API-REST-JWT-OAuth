@@ -93,6 +93,7 @@ public class UserServiceImpl implements UserService {
         currentUser.setName(user.getName());
         currentUser.setSurname(user.getSurname());
         currentUser.setEmail(user.getEmail());
+        currentUser.setPassword(passwordEncoder.encode(user.getPassword()));
         currentUser.setRoles(roles);
 
 
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new EntityNotFoundException("User with email: " + username + " not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User with email: " + username + " not found"));
 
         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
 

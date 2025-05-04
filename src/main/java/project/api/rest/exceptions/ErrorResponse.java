@@ -25,4 +25,11 @@ public class ErrorResponse {
         this.details = details;
     }
 
+    public ErrorResponse(Instant timestamp, int status, String error, String message, Map<String, String> details) {
+        this.timestamp = timestamp;
+        this.status = status;
+        this.error = error;
+        this.message = message;
+        this.details = details;
+    }
 }
