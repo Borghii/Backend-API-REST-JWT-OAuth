@@ -2,14 +2,17 @@ package project.api.rest.mapper;
 
 import org.junit.jupiter.api.Test;
 import project.api.rest.dto.UserDTO;
+import project.api.rest.entity.Permission;
+import project.api.rest.entity.Role;
+import project.api.rest.entity.RoleEnum;
 import project.api.rest.entity.User;
 
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static project.api.rest.constants.TestConstants.USER;
 import static project.api.rest.constants.TestConstants.USER_DTO;
 
 class UserMapperTest {
@@ -34,8 +37,29 @@ class UserMapperTest {
     @Test
     void toDTO() {
 
-        //give - when
+        //given
+        User USER = User.builder()
+                .name("Test")
+                .surname("Test")
+                .email("test2@gmail.com")
+                .password("Test2")
+                .roles(Set.of(Role.builder()
+                        .roleEnum(RoleEnum.valueOf("ADMIN"))
+                        .permissions(Set.of(
+                                Permission.builder().permissionName("READ").build(),
+                                Permission.builder().permissionName("CREATE").build(),
+                                Permission.builder().permissionName("DELETE").build(),
+                                Permission.builder().permissionName("UPDATE").build()))
+                        .build()))
+                .createdAt(Instant.MIN)
+                .updatedAt(Instant.now())
+                .build();
+
+
+        //when
         UserDTO userDTO = userMapper.toDTO(USER);
+
+
 
         //then
         assertThat(userDTO.getName()).isEqualTo(USER.getName());

@@ -46,4 +46,10 @@ public class TestConstants {
             .updatedAt(Instant.now())
             .build();
 
+    private static final Set<Permission> PERMISSIONS = Set.of(
+            Permission.builder().permissionName("READ").build(),
+            Permission.builder().permissionName("CREATE").build(),
+            Permission.builder().permissionName("DELETE").build(),
+            Permission.builder().permissionName("UPDATE").build());
+
 }

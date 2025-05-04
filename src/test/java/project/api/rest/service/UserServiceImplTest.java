@@ -9,6 +9,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import project.api.rest.constants.TestConstants;
@@ -286,7 +287,7 @@ class UserServiceImplTest {
 
             // when + then
             assertThatThrownBy(() -> userService.loadUserByUsername(email))
-                    .isInstanceOf(EntityNotFoundException.class)
+                    .isInstanceOf(UsernameNotFoundException.class)
                     .hasMessage("User with email: test@example.com not found");
         }
 
