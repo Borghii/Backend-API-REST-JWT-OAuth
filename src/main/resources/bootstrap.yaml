@@ -1,0 +1,19 @@
+# Vault Configuration
+spring:
+  cloud:
+    vault:
+      uri: ${URI_VAULT}
+      authentication: approle
+      namespace: admin
+      kv:
+        enabled: true
+        backend: secret
+        default-context: sample-secret
+      enabled: true
+      app-role:
+        role-id: ${ROLE_ID}
+        secret-id: ${SECRET_ID}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"
