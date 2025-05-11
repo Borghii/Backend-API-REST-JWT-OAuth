@@ -1,0 +1,6 @@
+# Vault Configuration
+spring:
+  profiles:
+    active: dev
+
+

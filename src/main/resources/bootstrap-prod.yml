@@ -1,0 +1,17 @@
+spring:
+  cloud:
+    vault:
+      config:
+        lifecycle:
+          enabled: false
+      uri: ${URI_VAULT}
+      authentication: approle
+      kv:
+        enabled: true
+        backend: secret
+        default-context: prod
+        application-name: ""
+      enabled: true
+      app-role:
+        role-id: ${ROLE_ID}
+        secret-id: ${SECRET_ID}

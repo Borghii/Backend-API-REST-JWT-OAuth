@@ -1,8 +1,10 @@
 package project.api.rest.ContainerDB;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.MySQLContainer;
 
+@ActiveProfiles(value = "test")
 public class MySQLContainerBaseIntTest {
 
 //    Si comparas esta clase con MySQLContainerTest, verás que las anotaciones
@@ -15,8 +17,7 @@ public class MySQLContainerBaseIntTest {
     protected static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.4.2")
             .withDatabaseName("testdb")
             .withUsername("root")
-            .withPassword("password")
-            .withInitScript("schema.sql");
+            .withPassword("password");
 
     static {
         mysqlContainer.start();

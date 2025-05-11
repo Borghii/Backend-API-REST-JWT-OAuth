@@ -1,19 +1,25 @@
-# Vault Configuration
 spring:
+  sql:
+    init:
+      mode: always
   cloud:
     vault:
-      uri: ${URI_VAULT}
+      config:
+        lifecycle:
+          enabled: false
+      uri: http://localhost:8200
       authentication: approle
-      namespace: admin
       kv:
         enabled: true
         backend: secret
-        default-context: sample-secret
+        default-context: test
+        application-name: ""
       enabled: true
       app-role:
         role-id: ${ROLE_ID}
         secret-id: ${SECRET_ID}
 
-logging:
-  pattern:
-    console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+
+
+
