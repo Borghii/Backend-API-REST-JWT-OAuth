@@ -1,20 +1,6 @@
 
 services:
 
-  vault:
-    image: hashicorp/vault:latest
-    container_name: vault-dev
-    ports:
-      - "8200:8200"
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - vault_data:/vault/data
-      - ./vault.hcl:/vault/config/vault.hcl
-    networks:
-      - vaultnet
-    command: vault server -config=/vault/config/vault.hcl
-
   user_db:
     image: mysql:8.4
     ports:
@@ -38,11 +24,6 @@ services:
 
 volumes:
   mysql_data:
-  vault_data:
-    external: true
-    name: vault_vault_data
-
-
 
 networks:
   vaultnet:

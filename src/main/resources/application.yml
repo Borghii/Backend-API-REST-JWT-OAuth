@@ -11,10 +11,9 @@ spring:
         format_sql: true
 
   datasource:
-    url: IN VAULT
-    username: IN VAULT
-    password: IN VAULT
-
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -28,7 +27,7 @@ spring:
         completions-path: /v1beta/openai/chat/completions
         options:
           model: gemini-2.0-flash
-      api-key: IN VAULT
+      api-key: ${SPRING_AI_OPENAI_API_KEY}
 
 logging:
   level:
@@ -43,8 +42,8 @@ logging:
 
 
 rsa:
-  private-key: IN VAULT
-  public-key: IN VAULT
+  private-key: ${RSA_PRIVATE_KEY}
+  public-key: ${RSA_PUBLIC_KEY}
 
 springdoc:
   api-docs:
