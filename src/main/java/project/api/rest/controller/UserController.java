@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +35,12 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Returns a list of all registered users in the system")
     @ApiResponse(responseCode = "200", description = "List retrieved successfully")
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam int page,
+                                                     @RequestParam int size) {
 
-        List<UserDTO> userDTOList = userService.findAllUsers().stream()
+        Pageable pageable = PageRequest.of(page,size);
+
+        List<UserDTO> userDTOList = userService.findAllUsers(pageable).stream()
                 .map(userMapper::toDTO)
                 .toList();
 

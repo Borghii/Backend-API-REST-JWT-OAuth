@@ -3,6 +3,7 @@ package project.api.rest.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,8 @@ import project.api.rest.entity.User;
 import project.api.rest.repository.RoleRepository;
 import project.api.rest.repository.UserRepository;
 
+
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +39,12 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+
+
+
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<User> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).getContent();
     }
 
     @Override
