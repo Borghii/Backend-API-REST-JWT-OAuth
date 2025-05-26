@@ -12,7 +12,8 @@
 - **TestContainers + Spring Boot Test** – Para pruebas de integración con bases de datos reales.  
 - **SLF4J + Logback** – Para manejo de logs.  
 - **Manejo de errores global** con `@ControllerAdvice`.  
-- **CI/CD** – Configuración con GitHub Actions, Jenkins o GitLab CI.  
+- **CI/CD** – Configuración con GitHub Actions, Jenkins o GitLab CI.
+- **Deploy en aws** - Despliegue en AWS con múltiples instancias EC2 Dockerizadas, un Application Load Balancer (ALB) y Auto Scaling para alta disponibilidad y escalabilidad automática.
 
 ## 2️⃣ Funcionalidades del Proyecto  
 
