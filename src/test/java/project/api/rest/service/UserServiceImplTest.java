@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,15 +45,21 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+
     @Test
     void shouldCallFindByAll() {
-        //when
-        userService.findAllUsers();
-        //then
-        verify(userRepository).findAll();
+        // given
+        Pageable pageable = mock(Pageable.class);
+        Page<User> userPage = new PageImpl<>(List.of(TestConstants.USER));
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
 
-        verify(userRepository, times(1)).findAll();
+        // when
+        List<User> result = userService.findAllUsers(pageable);
 
+        // then
+        verify(userRepository, times(1)).findAll(pageable);
+
+        assertThat(result.get(0)).isEqualTo(TestConstants.USER);
     }
 
     @Test

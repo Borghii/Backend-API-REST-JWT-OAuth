@@ -52,3 +52,7 @@ springdoc:
     path: /swagger-ui-custom.html
     operationsSorter: method
 
+
+allowed:
+    origin: ${ALLOWED_ORIGINS}
+

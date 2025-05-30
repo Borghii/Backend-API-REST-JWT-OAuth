@@ -95,7 +95,7 @@ class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
         void testGetAllUsers() throws Exception {
 
             //when/then
-            mockMvc.perform(get(ENDPOINT_USERS)
+            mockMvc.perform(get(ENDPOINT_USERS+"?page=0&size=5")
                             .contentType(APPLICATION_JSON)
                             .header("Authorization", "Bearer " + authToken))
                     .andExpect(status().isOk())
@@ -152,7 +152,7 @@ class UserControllerIntIntTest extends MySQLContainerBaseIntTest {
 
             // then
 
-            mockMvc.perform(get(ENDPOINT_USERS)
+            mockMvc.perform(get(ENDPOINT_USERS+"?page=0&size=5")
                             .contentType(APPLICATION_JSON)
                             .header("Authorization", "Bearer " + authToken))
 
