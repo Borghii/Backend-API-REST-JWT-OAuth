@@ -1,3 +1,4 @@
+
 # ✅ API REST con Spring Boot – Proyecto de Autenticación y Gestión de Usuarios
 
 API REST desarrollada con Spring Boot que implementa autenticación y autorización mediante JWT y OAuth2. Incluye manejo de roles, pruebas unitarias e integración, documentación Swagger, y despliegue en AWS con Docker.
@@ -200,6 +201,4 @@ src/
       ├── controller/
       └── service/
 ```
-
-
 
