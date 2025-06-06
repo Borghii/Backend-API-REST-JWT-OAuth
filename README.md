@@ -5,7 +5,7 @@
 - **Spring Boot** – Framework principal.  
 - **Spring Security + JWT + OAuth2** – Para autenticación y autorización segura.  
 - **Spring Data JPA + Hibernate** – Para la capa de persistencia con base de datos.  
-- **Base de datos** – PostgreSQL o MySQL (o MongoDB si prefieres NoSQL).  
+- **Base de datos** – MySQL  
 - **Swagger/OpenAPI** – Para documentar la API automáticamente.  
 - **Docker + Docker Compose** – Para contenedores y despliegue fácil.  
 - **JUnit + Mockito** – Para pruebas unitarias.  

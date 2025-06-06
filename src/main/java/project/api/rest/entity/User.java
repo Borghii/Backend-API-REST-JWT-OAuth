@@ -1,22 +1,23 @@
 package project.api.rest.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
+@Builder
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,10 @@ public class User {
     @Column(name = "surname", nullable = false, length = 50)
     private String surname;
 
-    @Column(name = "email", nullable = false, length = 68)
+    @Column(name = "password", nullable = false, length = 68)
+    private String password;
+
+    @Column(name = "email", nullable = false, length = 68, unique = true)
     private String email;
 
     @CreatedDate
@@ -37,7 +41,13 @@ public class User {
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at" , insertable = false)
+    @Column(name = "updated_at", insertable = false)
     private Instant updatedAt;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
 }

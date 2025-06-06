@@ -1,31 +1,50 @@
 package project.api.rest.service;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import project.api.rest.dto.UserDTO;
+import project.api.rest.entity.Role;
 import project.api.rest.entity.User;
+import project.api.rest.repository.RoleRepository;
 import project.api.rest.repository.UserRepository;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+
+import org.springframework.data.domain.Pageable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+
+
+
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<User> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).getContent();
     }
 
     @Override
@@ -34,6 +53,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + id + " not found"));
     }
 
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+    }
 
     @Override
     public User createUser(User user) {
@@ -42,10 +66,20 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
+        Set<Role> roles = getRoles(user);
+
+        if (roles.isEmpty()) {
+            throw new IllegalArgumentException("The roles specified does not exist.");
+        }
+
+        user.setRoles(roles);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
-    private boolean userExist(User user){
+    boolean userExist(User user) {
         return userRepository.existsByEmail(user.getEmail());
     }
 
@@ -60,15 +94,23 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
 
+        Set<Role> roles = getRoles(user);
+
         currentUser.setName(user.getName());
         currentUser.setSurname(user.getSurname());
         currentUser.setEmail(user.getEmail());
+        currentUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        currentUser.setRoles(roles);
 
 
         return userRepository.save(currentUser);
     }
 
-
+    HashSet<Role> getRoles(User user) {
+        return new HashSet<>(roleRepository.findRoleByRoleEnumIn(user.getRoles().stream()
+                .map(Role::getRoleEnum)
+                .collect(Collectors.toList())));
+    }
 
 
     @Override
@@ -79,5 +121,24 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email: " + username + " not found"));
+
+        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+
+        //adding roles
+        user.getRoles().forEach(role -> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
+
+        //adding roles' permissions
+        user.getRoles().stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .forEach(permission -> authorityList.add(new SimpleGrantedAuthority(permission.getPermissionName())));
+
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorityList);
     }
 }

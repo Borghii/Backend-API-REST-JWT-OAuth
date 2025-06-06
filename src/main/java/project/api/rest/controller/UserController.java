@@ -5,22 +5,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.Table;
 import jakarta.validation.Valid;
-import org.hibernate.annotations.Fetch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.api.rest.dto.UserDTO;
-import project.api.rest.entity.User;
 import project.api.rest.mapper.UserMapper;
 import project.api.rest.service.UserService;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -31,7 +27,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @Autowired
-    public UserController(UserService userService, UserMapper userMapper){
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
     }
@@ -39,9 +35,12 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Returns a list of all registered users in the system")
     @ApiResponse(responseCode = "200", description = "List retrieved successfully")
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam int page,
+                                                     @RequestParam int size) {
 
-        List<UserDTO> userDTOList = userService.findAllUsers().stream()
+        Pageable pageable = PageRequest.of(page,size);
+
+        List<UserDTO> userDTOList = userService.findAllUsers(pageable).stream()
                 .map(userMapper::toDTO)
                 .toList();
 
@@ -54,7 +53,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id){
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id) {
         return new ResponseEntity<>(userMapper.toDTO(userService.findById(id)), HttpStatus.OK);
     }
 
@@ -76,9 +75,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable Integer id){
+    public ResponseEntity<String> deleteUserById(@PathVariable Integer id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>("User with id : "+ id+" deleted successfully", HttpStatus.OK);
+        return new ResponseEntity<>("User with id : " + id + " deleted successfully", HttpStatus.OK);
     }
 
     @Operation(summary = "Update user by ID", description = "Updates user information based on their ID")
@@ -92,7 +91,7 @@ public class UserController {
             @PathVariable Integer userId,
             @Valid @RequestBody UserDTO userDTO) {
 
-        UserDTO updatedUserDTO = userMapper.toDTO(userService.updateUser(userId,userMapper.toEntity(userDTO)));
+        UserDTO updatedUserDTO = userMapper.toDTO(userService.updateUser(userId, userMapper.toEntity(userDTO)));
 
         return new ResponseEntity<>(updatedUserDTO, HttpStatus.OK);
     }
