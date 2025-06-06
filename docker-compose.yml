@@ -16,16 +16,10 @@ services:
       retries: 15
       interval: 5s
 
-    networks:
-      - vaultnet
-
     volumes:
       - mysql_data:/var/lib/mysql  # Persistencia de datos    
 
 volumes:
   mysql_data:
 
-networks:
-  vaultnet:
-    external: true
 

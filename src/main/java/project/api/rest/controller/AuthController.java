@@ -1,5 +1,9 @@
 package project.api.rest.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,8 +23,8 @@ import project.api.rest.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
 public class AuthController {
-
 
     private final TokenService tokenService;
     private final UserService userService;
@@ -33,17 +37,14 @@ public class AuthController {
         this.userMapper = userMapper;
     }
 
-//    @PostMapping("/sign-up")
-//    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
-//        UserDTO createdUserDTO = userMapper.toDTO(userService.createUser(userMapper.toEntity(userDTO)));
-//        return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
-//    }
-
-//    @PostMapping("/token")
-//    public String token(Authentication authentication) {
-//        return tokenService.generateToken(authentication);
-//    }
-
+    @Operation(
+            summary = "Register new user",
+            description = "Creates a new user account and returns an authentication token"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or user already exists")
+    })
     @PostMapping("/sign-up")
     public ResponseEntity<AuthResponse> createUser(@Valid @RequestBody UserDTO userDTO) {
 
@@ -59,6 +60,14 @@ public class AuthController {
         return new ResponseEntity<>(new AuthResponse(createdUserDTO, token), HttpStatus.CREATED);
     }
 
+    @Operation(
+            summary = "Login user",
+            description = "Authenticates user and returns a JWT token"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(Authentication authentication) {
         String token = tokenService.generateToken(authentication);
@@ -67,5 +76,5 @@ public class AuthController {
 
         return new ResponseEntity<>(new AuthResponse(authUserDTO, token), HttpStatus.OK);
     }
-
 }
+
