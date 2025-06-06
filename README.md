@@ -176,6 +176,8 @@ Desplegado con:
 
 
 
+![Diagram-Api-REST-JWT drawio (4)](https://github.com/user-attachments/assets/bc200f4e-f4e7-463c-bb18-e1a87be93fd9)
+
 
 
 
