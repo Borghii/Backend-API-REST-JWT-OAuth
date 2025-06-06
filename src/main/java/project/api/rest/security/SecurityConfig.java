@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -49,6 +48,7 @@ public class SecurityConfig {
                     //Public Endpoints
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-up").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/health").permitAll();
 
                     //SWAGGER Endpoint
                     auth.requestMatchers(HttpMethod.GET, "/swagger-ui-custom.html").permitAll();
