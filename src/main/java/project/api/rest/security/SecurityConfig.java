@@ -70,8 +70,9 @@ public class SecurityConfig {
 
                 })
 
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                .oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(customAuthenticationEntryPoint))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .jwt(Customizer.withDefaults()))
 
                 .httpBasic(basic ->
                         basic.authenticationEntryPoint(customAuthenticationEntryPoint))
